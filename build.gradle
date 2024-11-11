@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.5'
+    id 'war'
+    id 'org.springframework.boot' version '3.3.4'
     id 'io.spring.dependency-management' version '1.1.6'
 }
 
@@ -26,10 +27,37 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // spring boot에서 jsp를 사용하기 위한 설정
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'jakarta.servlet:jakarta.servlet-api'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
+
+    // 쿼리 파라미터 추가 외부 로그 남기기
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
+    // 입력값 검증 라이브러리
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    //스프링 시큐리티 모듈
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // spring-boot-starter-mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // 자바 언어를 통해 smtp 통신을 할 수 있게 하는 라이브러리
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
+
+    // OpenCSV 사용
+    implementation 'com.opencsv:opencsv:5.5.2'
 }
 
 tasks.named('test') {

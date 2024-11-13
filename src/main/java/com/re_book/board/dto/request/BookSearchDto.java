@@ -1,6 +1,5 @@
-package com.re_book.list.dto;
+package com.re_book.board.dto;
 
-import jdk.jfr.Category;
 import lombok.*;
 
 @Setter @Getter @ToString

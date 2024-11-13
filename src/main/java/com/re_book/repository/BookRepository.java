@@ -1,4 +1,4 @@
-package com.book4w.book4w.repository;
+package com.re_book.board.repository;
 
 import com.book4w.book4w.entity.Book;
 import org.springframework.data.domain.Page;

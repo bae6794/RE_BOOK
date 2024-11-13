@@ -1,7 +1,5 @@
-package com.re_book.profile.entity;
+package com.re_book.entity;
 
-import com.re_book.entity.Book;
-import com.re_book.user.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 

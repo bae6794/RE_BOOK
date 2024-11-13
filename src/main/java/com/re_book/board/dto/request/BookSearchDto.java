@@ -1,4 +1,4 @@
-package com.re_book.board.dto;
+package com.re_book.board.dto.request;
 
 import lombok.*;
 

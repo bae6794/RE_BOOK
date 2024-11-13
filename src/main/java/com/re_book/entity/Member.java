@@ -1,7 +1,5 @@
-package com.re_book.user.entity;
+package com.re_book.entity;
 
-import com.re_book.entity.Book;
-import com.re_book.entity.Review;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

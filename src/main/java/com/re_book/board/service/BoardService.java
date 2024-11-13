@@ -1,4 +1,4 @@
-package com.book4w.book4w.service;
+package com.re_book.board.service;
 
 
 import com.book4w.book4w.dto.response.BookDetailResponseDTO;

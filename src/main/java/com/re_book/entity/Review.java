@@ -1,4 +1,4 @@
-package com.re_book.board.entity;
+package com.re_book.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

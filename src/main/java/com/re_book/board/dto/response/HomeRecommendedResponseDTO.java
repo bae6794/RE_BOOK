@@ -1,6 +1,7 @@
 package com.re_book.board.dto.response;
 
-import com.book4w.book4w.entity.Book;
+
+import com.re_book.entity.Book;
 import lombok.*;
 
 @Getter @ToString @EqualsAndHashCode

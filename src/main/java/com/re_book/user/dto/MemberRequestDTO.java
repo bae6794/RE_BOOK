@@ -1,6 +1,7 @@
 package com.re_book.user.dto;
 
-import com.book4w.book4w.entity.Member;
+
+import com.re_book.entity.Member;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

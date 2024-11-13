@@ -3,6 +3,8 @@ package com.re_book.profile.service;
 import com.re_book.entity.Member;
 import com.re_book.profile.dto.LikedBooksResponseDTO;
 import com.re_book.profile.dto.MyReviewResponseDTO;
+import com.re_book.profile.dto.ProfileMemberResponseDTO;
+import com.re_book.user.service.MemberService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

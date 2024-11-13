@@ -1,6 +1,7 @@
 package com.re_book.board.service;
 
-import com.book4w.book4w.repository.BookRepository;
+
+import com.re_book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

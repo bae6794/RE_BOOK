@@ -1,9 +1,10 @@
 package com.re_book.user.controller;
 
-import com.book4w.book4w.dto.request.MemberRequestDTO;
-import com.book4w.book4w.entity.Member;
-import com.book4w.book4w.service.LoginResult;
-import com.book4w.book4w.service.MemberService;
+
+import com.re_book.entity.Member;
+import com.re_book.user.dto.MemberRequestDTO;
+import com.re_book.user.service.LoginResult;
+import com.re_book.user.service.MemberService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.book4w.book4w.utils.LoginUtils.LOGIN_KEY;
+import static com.re_book.utils.LoginUtils.LOGIN_KEY;
+
 
 @Controller
 @RequiredArgsConstructor

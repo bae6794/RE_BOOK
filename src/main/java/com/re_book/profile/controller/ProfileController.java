@@ -1,7 +1,10 @@
 package com.re_book.profile.controller;
 
 
+import com.re_book.profile.dto.LikedBooksResponseDTO;
+import com.re_book.profile.dto.MyReviewResponseDTO;
 import com.re_book.profile.dto.ProfileMemberResponseDTO;
+import com.re_book.profile.service.ProfileService;
 import com.re_book.user.dto.LoginUserResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

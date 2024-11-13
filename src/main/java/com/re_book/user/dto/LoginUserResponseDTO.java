@@ -1,7 +1,8 @@
 package com.re_book.user.dto;
 
-import com.book4w.book4w.entity.Book;
-import com.book4w.book4w.entity.Review;
+
+import com.re_book.entity.Book;
+import com.re_book.entity.Review;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

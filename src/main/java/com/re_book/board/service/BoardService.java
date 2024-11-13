@@ -1,11 +1,10 @@
 package com.re_book.board.service;
 
 
-import com.book4w.book4w.dto.response.BookDetailResponseDTO;
-import com.book4w.book4w.entity.Book;
 
-import com.book4w.book4w.repository.BookLikeRepository;
-import com.book4w.book4w.repository.BookRepository;
+import com.re_book.board.dto.response.BookDetailResponseDTO;
+import com.re_book.entity.Book;
+import com.re_book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

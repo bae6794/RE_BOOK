@@ -2,7 +2,12 @@ package com.re_book.board.service;
 
 
 import com.re_book.board.dto.response.DetailPageResponseDTO;
+import com.re_book.entity.Book;
+import com.re_book.entity.BookLike;
+import com.re_book.entity.Member;
+import com.re_book.repository.BookLikeRepository;
 import com.re_book.repository.BookRepository;
+import com.re_book.user.service.MemberService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

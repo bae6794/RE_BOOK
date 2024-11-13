@@ -1,6 +1,7 @@
 package com.re_book.user.controller;
 
-import com.book4w.book4w.repository.MemberRepository;
+
+import com.re_book.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

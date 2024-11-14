@@ -2,6 +2,7 @@ package com.re_book.user.controller;
 
 
 import com.re_book.entity.Member;
+import com.re_book.user.dto.LoginRequestDTO;
 import com.re_book.user.dto.MemberRequestDTO;
 import com.re_book.user.service.LoginResult;
 import com.re_book.user.service.MemberService;
@@ -9,11 +10,10 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
 import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
@@ -32,23 +32,25 @@ public class MemberController {
     }
 
     @PostMapping("/sign-in")
-    public String signIn(@RequestParam String email,
-                         @RequestParam String password,
-                         HttpServletRequest request
-                         ) {
+    public ResponseEntity<?> signIn(@RequestBody LoginRequestDTO dto, HttpServletRequest request) {
 
-        Member member =  memberService.findByEmail(email); // 계정 찾아서
-        LoginResult result = memberService.authenticate(email,password); // 계정,비번 맞니?
+        String email = dto.getEmail();
+        String password = dto.getPassword();
+
+        Member member = memberService.findByEmail(email);
+        LoginResult result = memberService.authenticate(email, password);
         HttpSession session = request.getSession();
-        if (result == LoginResult.SUCCESS) { // 맞으면
-            session.setAttribute(LOGIN_KEY,member);
 
-            memberService.maintainLoginState(session,email); // 로그인상태 유지!
-            return "redirect:/"; // 로그인 성공 후 리다이렉트
+        if (result == LoginResult.SUCCESS) {
+            session.setAttribute(LOGIN_KEY, member);
+            memberService.maintainLoginState(session, email);
+            return ResponseEntity.ok().body("로그인 성공"); // JSON으로 성공 응답
         } else {
-            return "redirect:/sign-in"; // 로그인 실패 시 리다이렉트
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패");
         }
     }
+
+
 
     @GetMapping("/log-out")
     public String logout(HttpSession session) {

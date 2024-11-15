@@ -44,10 +44,11 @@ public class BoardController {
 
 
     @GetMapping("/list")
-    public String list(Model model,
-                       @PageableDefault(size = 9) Pageable page,
+    public ResponseEntity<?> list(@PageableDefault(size = 9) Pageable page,
                        @RequestParam(required = false) String sort,
                        @RequestParam(required = false) String query) {
+        Map<String, Object> response = new HashMap<>();
+
 
         // page 설정에 맞춰 북 목록을 Map에 저장하겠다.
         Page<BookDetailResponseDTO> bookPage;
@@ -58,12 +59,36 @@ public class BoardController {
             bookPage = getSortedBookPage(sort, page);
         }
 
-        model.addAttribute("bList", bookPage.getContent());
-        model.addAttribute("maker", bookPage);
-        model.addAttribute("sort", sort);
-        model.addAttribute("query", query);
-        return "list";
+        response.put("bList", bookPage.getContent());
+        response.put("maker", bookPage);
+        response.put("sort", sort);
+        response.put("query", query);
+        CommonResDto resDto
+                = new CommonResDto(HttpStatus.OK, "책목록 조회 완료", response);
+        return new ResponseEntity<>(resDto, HttpStatus.OK); // 성공 시 OK 상태 코드와 함께 반환
     }
+
+//    @GetMapping("/list")
+//    public String list(Model model,
+//                       @PageableDefault(size = 9) Pageable page,
+//                       @RequestParam(required = false) String sort,
+//                       @RequestParam(required = false) String query) {
+//
+//        // page 설정에 맞춰 북 목록을 Map에 저장하겠다.
+//        Page<BookDetailResponseDTO> bookPage;
+//
+//        if (query != null && !query.trim().isEmpty()) {
+//            bookPage = getSortedBookPageForSearch(sort, page, query);
+//        } else {
+//            bookPage = getSortedBookPage(sort, page);
+//        }
+//
+//        model.addAttribute("bList", bookPage.getContent());
+//        model.addAttribute("maker", bookPage);
+//        model.addAttribute("sort", sort);
+//        model.addAttribute("query", query);
+//        return "list";
+//    }
 
     private Page<BookDetailResponseDTO> getSortedBookPage(String sort, Pageable pageable) {
         if (sort == null) {

@@ -14,36 +14,35 @@ import java.util.List;
 @Builder
 
 @Entity
-@Table(name = "books")
+@Table(name = "tbl_books")
 public class Book {
 
     @Id
-    @Column(name = "book_uuid")
     @GeneratedValue(strategy = GenerationType.UUID) // UUID 생성 전략
+    @Column(name="book_uuid")
     private String id;
 
-    @Column(name = "book_name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "book_writer", nullable = false)
+    @Column(nullable = false)
     private String writer;
 
-    @Column(name = "book_pub", nullable = false)
+    @Column(nullable = false)
     private String pub;
 
-    @Column(name = "book_year", nullable = false)
+    @Column(nullable = false)
     private int year;
 
-    @Column(name = "book_rating", nullable = false)
+    @Column(nullable = false)
     private double rating = 0.0;
 
-    @Column(name = "book_review_count", nullable = false)
+    @Column(nullable = false)
     private int reviewCount = 0;
 
-    @Column(name = "book_like_count", nullable = false)
+    @Column(nullable = false)
     private int likeCount = 0;
 
-    @Column(name = "book_cover_image")
     private String coverImage;
 
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL) // 리뷰와의 관계 추가

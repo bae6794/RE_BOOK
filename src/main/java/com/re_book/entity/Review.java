@@ -20,7 +20,7 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "review_uuid", nullable = false, updatable = false)
+    @Column(name="review_uuid", nullable = false, updatable = false)
     private String id; // Long 타입으로 변경 (UUID 대신)
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,7 +38,7 @@ public class Review {
     private int rating; // 평점
 
     @CreatedDate
-    @Column(name = "created_date", updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdDate;
 
 

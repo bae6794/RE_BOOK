@@ -3,10 +3,12 @@ package com.re_book.user.service;
 
 import com.re_book.entity.Member;
 import com.re_book.repository.MemberRepository;
+import com.re_book.user.dto.LoginRequestDTO;
 import com.re_book.user.dto.LoginUserResponseDTO;
 import com.re_book.user.dto.MemberRequestDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.Random;
 
-import static com.re_book.user.service.LoginResult.*;
 import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 
 
@@ -37,39 +38,53 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public LoginResult authenticate(String email,
-                                    String pw) {
-
-        Member member = memberRepository.findByEmail(email);
-
-        //회원가입 여부 검사
-        if (member == null) {
-            return  NO_ACCESS;
+    public Member login(LoginRequestDTO dto) {
+        // 이메일로 멤버 조회
+        Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(() ->
+                new EntityNotFoundException("User not found")
+        );
+        // 비밀번호 확인하기 (암호화 되어있으니 encoder에게 부탁)
+        if (!encoder.matches(dto.getPassword(), member.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 비밀번호 일치 검사
-        if (!encoder.matches(pw, member.getPassword())) {
-            return NO_PW;
+        return member;
         }
 
 
-        return SUCCESS;
-    }
+//    public LoginResult authenticate(String email,
+//                                    String pw) {
+//
+//        Member member = memberRepository.findByEmail(email);
+//
+//        //회원가입 여부 검사
+//        if (member == null) {
+//            return  NO_ACCESS;
+//        }
+//
+//        // 비밀번호 일치 검사
+//        if (!encoder.matches(pw, member.getPassword())) {
+//            return NO_PW;
+//        }
+//
+//
+//        return SUCCESS;
+//    }
 
-    public void maintainLoginState(HttpSession session,
-                                   String email) {
-
-        Member foundMember = findByEmail(email);
-
-        LoginUserResponseDTO dto = LoginUserResponseDTO.builder()
-                .uuid(foundMember.getUuid())
-                .email(foundMember.getEmail())
-                .nickname(foundMember.getNickname())
-                .likedBooks(foundMember.getLikedBooks())
-                .reviews(foundMember.getReviews())
-                .build();
-        session.setAttribute(LOGIN_KEY, dto);
-    }
+//    public void maintainLoginState(HttpSession session,
+//                                   String email) {
+//
+//        Member foundMember = findByEmail(email);
+//
+//        LoginUserResponseDTO dto = LoginUserResponseDTO.builder()
+//                .uuid(foundMember.getUuid())
+//                .email(foundMember.getEmail())
+//                .nickname(foundMember.getNickname())
+//                .likedBooks(foundMember.getLikedBooks())
+//                .reviews(foundMember.getReviews())
+//                .build();
+//        session.setAttribute(LOGIN_KEY, dto);
+//    }
 
     public String sendAuthCode(String email) throws MessagingException {
         // 난수 생성
@@ -118,16 +133,11 @@ public class MemberService {
 
 
     public Member findByEmail(String email) {
-        return memberRepository.findByEmail(email);
+        return memberRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User not found")
+        );
     }
 
-    public void updateMemberSessionId(Member member) {
-        memberRepository.save(member);
-    }
-
-    public Member findBySessionId(String id) {
-        return memberRepository.findBySessionId(id);
-    }
 
     public void update(Member member) {
         memberRepository.save(member);

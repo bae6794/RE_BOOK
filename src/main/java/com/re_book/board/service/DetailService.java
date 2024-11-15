@@ -22,7 +22,7 @@ public class DetailService {
     public DetailPageResponseDTO getBookDetail(String id, String userId) {
         return bookRepository.findById(id)
             .map(book -> {
-                boolean isLiked = bookLikeRepository.existsByBookIdAndMemberUuid(id, userId);
+                boolean isLiked = bookLikeRepository.existsByBookIdAndMemberId(id, userId);
                 return DetailPageResponseDTO.builder()
                     .id(book.getId())
                     .name(book.getName())
@@ -48,10 +48,11 @@ public class DetailService {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("책을 찾을 수 없습니다."));
         Member member = memberService.findById(memberUuid).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        boolean isLiked = bookLikeRepository.existsByBookIdAndMemberUuid(bookId, memberUuid);
+        boolean isLiked = bookLikeRepository
+                .existsByBookIdAndMemberId(bookId, memberUuid);
         if (isLiked) {
             // 좋아요 삭제
-            bookLikeRepository.deleteByBookIdAndMemberUuid(bookId, memberUuid);
+            bookLikeRepository.deleteByBookIdAndMemberId(bookId, memberUuid);
             book.setLikeCount(book.getLikeCount() - 1);
 
             // Member의 likedBooks 목록에서 삭제

@@ -6,7 +6,11 @@ import com.re_book.board.dto.response.ReviewResponseDTO;
 import com.re_book.board.service.BoardService;
 import com.re_book.board.service.DetailService;
 import com.re_book.board.service.ReviewService;
+import com.re_book.common.auth.JwtTokenProvider;
+import com.re_book.common.auth.TokenUserInfo;
 import com.re_book.user.dto.LoginUserResponseDTO;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +30,7 @@ import java.util.Map;
 import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 
 
-@Controller
+@RestController
 @RequestMapping("/board")
 @RequiredArgsConstructor
 @Slf4j
@@ -35,6 +39,7 @@ public class BoardController {
     private final BoardService boardService;
     private final DetailService detailService;
     private final ReviewService reviewService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/list")
     public String list(Model model,
@@ -119,46 +124,83 @@ public class BoardController {
         return "detail"; // JSP 페이지로 이동
     }
 
-
-
-
     @PostMapping("/detail/{bookId}/toggle-like")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable String bookId, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable String bookId, @RequestHeader("Authorization") String authorization) {
         log.info("/toggle-like: POST, {}", bookId);
-
-        // 세션에서 로그인 사용자 정보 가져오기
-        HttpSession session = request.getSession();
-        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
-
-        // 사용자 UUID 출력
-        if (user != null) {
-            System.out.println("로그인 사용자 UUID: " + user.getUuid());
-        }
 
         Map<String, Object> response = new HashMap<>();
 
-        // 로그인 상태 확인
-        if (user == null) {
+        // Authorization 헤더가 없거나, 'Bearer ' 접두어가 없는 경우 처리
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
             response.put("success", false);
-            response.put("message", "로그인이 필요하당께.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response); // 비로그인 시 UNAUTHORIZED 상태 코드 반환
-        } else {
-            log.info("로그인된 사용자 요청 - UUID: {}", user.getUuid());
+            response.put("message", "Authorization 헤더가 없거나 잘못된 형식입니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-        System.out.println("null이 아니랑꼐요");
 
-        // Issue 여기서 부터 시작.
+        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
+
+        TokenUserInfo userInfo = null;
+        try {
+            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token); // 토큰 유효성 검사 및 사용자 정보 추출
+        } catch (ExpiredJwtException e) {
+            response.put("success", false);
+            response.put("message", "토큰이 만료되었습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        } catch (UnsupportedJwtException e) {
+            response.put("success", false);
+            response.put("message", "지원되지 않는 토큰 형식입니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "토큰이 유효하지 않거나 만료되었습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response); // 토큰 검증 실패 시 UNAUTHORIZED 응답
+        }
+
         // 좋아요 토글 및 카운트 업데이트
-        boolean isLiked = detailService.toggleLike(bookId, user.getUuid());
+        boolean isLiked = detailService.toggleLike(bookId, userInfo.getId());
 
-        int likeCount = detailService.getBookDetail(bookId, user.getUuid()).getLikeCount(); // 좋아요 수 업데이트
+        int likeCount = detailService.getBookDetail(bookId, userInfo.getId()).getLikeCount(); // 좋아요 수 업데이트
         response.put("success", true);
         response.put("isLiked", isLiked);
         response.put("likeCount", likeCount); // 좋아요 수를 응답에 포함
 
         return ResponseEntity.ok(response); // 성공 시 OK 상태 코드와 함께 반환
     }
+
+
+
+
+//    @PostMapping("/detail/{bookId}/toggle-like")
+//    @ResponseBody
+//    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable String bookId, @RequestHeader("Authorization") String authorization) {
+//        log.info("/toggle-like: POST, {}", bookId);
+//
+//
+//        Map<String, Object> response = new HashMap<>();
+//
+//        String token = authorization.substring(7);
+//
+//        TokenUserInfo memberInfo = null;
+//        try {
+//            memberInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token); // 토큰 유효성 검사 및 사용자 정보 추출
+//        } catch (Exception e) {
+//            response.put("success", false);
+//            response.put("message", "토큰이 유효하지 않거나 만료되었습니다.");
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response); // 토큰 검증 실패 시 UNAUTHORIZED 응답
+//        }
+//
+//
+//        // 좋아요 토글 및 카운트 업데이트
+//        boolean isLiked = detailService.toggleLike(bookId, memberInfo.getId());
+//
+//        int likeCount = detailService.getBookDetail(bookId, memberInfo.getId()).getLikeCount(); // 좋아요 수 업데이트
+//        response.put("success", true);
+//        response.put("isLiked", isLiked);
+//        response.put("likeCount", likeCount); // 좋아요 수를 응답에 포함
+//
+//        return ResponseEntity.ok(response); // 성공 시 OK 상태 코드와 함께 반환
+//    }
 
 
 

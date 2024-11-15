@@ -26,8 +26,8 @@ public class ReviewResponseDTO {
         this.id = review.getId();
         this.rating = review.getRating();
         this.content = review.getContent();
-        this.memberName = review.getMember().getNickname();
-        this.memberUuid = review.getMember().getUuid();
+        this.memberName = review.getMember().getName();
+        this.memberUuid = review.getMember().getId();
         this.reviewCount = review.getBook().getReviewCount();
     }
 

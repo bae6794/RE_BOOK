@@ -1,15 +1,16 @@
-//package com.re_book.common.auth;
-//
-//import com.playdata.orderservice.user.entity.Role;
-//import lombok.*;
-//
-//@Setter @Getter @ToString
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Builder
-//public class TokenUserInfo {
-//
-//    private String email;
-//    private Role role;
-//
-//}
+package com.re_book.common.auth;
+
+
+import com.re_book.user.entity.Role;
+import lombok.*;
+
+@Setter @Getter @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TokenUserInfo {
+
+    private String id;
+    private Role role;
+
+}

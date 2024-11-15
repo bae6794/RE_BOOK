@@ -83,7 +83,7 @@ public class ProfileService {
         Member member = memberService.findByEmail(email);
         if (member != null) {
             return ProfileMemberResponseDTO.builder()
-                    .nickname(member.getNickname())
+                    .nickname(member.getName())
                     .email(member.getEmail())
                     .createdAt(member.getCreatedAt())
                     .build();
@@ -94,7 +94,7 @@ public class ProfileService {
     public void changeNickname(String email, String newNickname) {
         Member member = memberService.findByEmail(email);
         if (member != null) {
-            member.setNickname(newNickname);
+            member.setName(newNickname);
             memberService.update(member); // 회원 정보를 업데이트하는 메서드 호출
         }
     }

@@ -7,8 +7,8 @@ import com.re_book.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookLikeRepository extends JpaRepository<BookLike, String> {
-    boolean existsByBookIdAndMemberUuid(String bookId, String memberUuid);
-    void deleteByBookIdAndMemberUuid(String bookId, String memberUuid);
+    boolean existsByBookIdAndMemberId(String bookId, String memberUuid);
+    void deleteByBookIdAndMemberId(String bookId, String memberUuid);
 
     BookLike findByBookAndMember(Book book, Member member);
 }

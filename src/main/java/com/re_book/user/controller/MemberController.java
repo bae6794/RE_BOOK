@@ -1,30 +1,38 @@
 package com.re_book.user.controller;
 
 
+import com.re_book.common.auth.JwtTokenProvider;
+import com.re_book.common.dto.CommonResDto;
 import com.re_book.entity.Member;
 import com.re_book.user.dto.LoginRequestDTO;
 import com.re_book.user.dto.MemberRequestDTO;
-import com.re_book.user.service.LoginResult;
 import com.re_book.user.service.MemberService;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
     private final MemberService memberService;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @Qualifier("user-template") // RedisTemplate이 여러 개 빈 등록되었을 경우 명시한다.
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @GetMapping("/sign-in")
     public String signIn() {
@@ -32,31 +40,35 @@ public class MemberController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> signIn(@RequestBody LoginRequestDTO dto, HttpServletRequest request) {
+    public ResponseEntity<CommonResDto> signIn(@RequestBody LoginRequestDTO dto) {
+        Member member = memberService.login(dto);
 
-        String email = dto.getEmail();
-        String password = dto.getPassword();
+        String token
+                = jwtTokenProvider.createToken(member.getId(), member.getRole().toString());
+        log.info("token: {}", token);
 
-        Member member = memberService.findByEmail(email);
-        LoginResult result = memberService.authenticate(email, password);
-        HttpSession session = request.getSession();
+        String refreshToken
+                = jwtTokenProvider.createRefreshToken(member.getId(), member.getRole().toString());
 
-        if (result == LoginResult.SUCCESS) {
-            session.setAttribute(LOGIN_KEY, member);
-            memberService.maintainLoginState(session, email);
-            return ResponseEntity.ok().body("로그인 성공"); // JSON으로 성공 응답
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패");
-        }
+        redisTemplate.opsForValue().set(member.getEmail(), refreshToken, 240, TimeUnit.HOURS);
+
+        // 생성된 토큰 외에 추가로 전달할 정보가 있다면 Map을 사용하는 것이 좋습니다.
+        Map<String, Object> logInfo = new HashMap<>();
+        logInfo.put("token", token);
+        logInfo.put("id", member.getId());
+
+        CommonResDto resDto
+                = new CommonResDto(HttpStatus.OK, "로그인 성공!", logInfo);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
 
-
-
     @GetMapping("/log-out")
-    public String logout(HttpSession session) {
-        // 현재 세션 무효화
-        session.invalidate();
-        return "redirect:/sign-in"; // 로그아웃 후 리다이렉트
+    public ResponseEntity<CommonResDto> logout() {
+
+        Map<String, Object> logInfo = new HashMap<>();
+        CommonResDto resDto
+                = new CommonResDto(HttpStatus.OK, "로그아웃 성공!!", logInfo);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
 
     @GetMapping("/sign-up")

@@ -61,7 +61,7 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException("리뷰를 찾을 수 없습니다."));
 
         // 본인의 리뷰인지 확인
-        if (!review.getMember().getUuid().equals(userId)) {
+        if (!review.getMember().getId().equals(userId)) {
             throw new SecurityException("본인의 리뷰만 수정할 수 있습니다.");
         }
 
@@ -74,7 +74,7 @@ public class ReviewService {
                 .orElseThrow(() -> new EntityNotFoundException("리뷰를 찾을 수 없습니다."));
 
         // 본인의 리뷰인지 확인
-        if (!review.getMember().getUuid().equals(userId)) {
+        if (!review.getMember().getId().equals(userId)) {
             throw new SecurityException("본인의 리뷰만 삭제할 수 있습니다.");
         }
 

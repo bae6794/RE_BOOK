@@ -16,7 +16,7 @@ public class MemberRequestDTO {
     public Member toEntity(PasswordEncoder encoder) {
         return Member.builder()
                 .email(email)
-                .nickname(nickname)
+                .name(nickname)
                 .password(encoder.encode(password))
                 .build();
     }

@@ -1,5 +1,7 @@
 package com.re_book.entity;
 
+import com.re_book.user.dto.UserResDto;
+import com.re_book.user.entity.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,28 +19,29 @@ import java.util.List;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(name = "members")
+@Table(name = "tbl_members")
 public class Member {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) // UUID 대신 AUTO_INCREMENT 사용
-    @Column(name = "member_uuid", nullable = false, updatable = false)
-    private String uuid; // Long 타입으로 변경 (UUID 대신)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name="member_uuid")
+    private String id;
 
-    @Column(name = "member_email", unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "member_pw", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "member_nickname", nullable = false)
-    private String nickname;
+    @Column(nullable = false)
+    private String name;
 
-    @Column(name = "member_session_id")
-    private String sessionId; // 세션 ID 필드 추가
+    @Enumerated(EnumType.STRING)
+    @Builder.Default // build시 초기화된 값으로 세팅하기 위한 아노테이션
+    private Role role = Role.USER;
 
     @CreatedDate
-    @Column(name = "created_at", updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -51,4 +54,13 @@ public class Member {
             inverseJoinColumns = @JoinColumn(name = "book_uuid")
     )
     private List<Book> likedBooks; // 좋아요한 책 목록
+
+    public UserResDto fromEntity() {
+        return UserResDto.builder()
+                .id(id)
+                .name(name)
+                .email(email)
+                .role(role)
+                .build();
+    }
 }

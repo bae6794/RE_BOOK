@@ -19,7 +19,7 @@ public class DetailService {
     private final BookLikeRepository bookLikeRepository;
     private final MemberService memberService;
 
-    public DetailPageResponseDTO getBookDetail(String id, String userId) {
+    public DetailPageResponseDTO getBookDetailWithIsLike(String id, String userId) {
         return bookRepository.findById(id)
             .map(book -> {
                 boolean isLiked = bookLikeRepository.existsByBookIdAndMemberId(id, userId);
@@ -37,6 +37,26 @@ public class DetailService {
                     .build();
             })
             .orElseThrow(() -> new IllegalArgumentException("Book not found"));
+    }
+
+    public DetailPageResponseDTO getBookDetailWithIsLike(String id, String userId) {
+        return bookRepository.findById(id)
+                .map(book -> {
+                    boolean isLiked = bookLikeRepository.existsByBookIdAndMemberId(id, userId);
+                    return DetailPageResponseDTO.builder()
+                            .id(book.getId())
+                            .name(book.getName())
+                            .writer(book.getWriter())
+                            .pub(book.getPub())
+                            .year(book.getYear())
+                            .rating(book.getRating())
+                            .reviewCount(book.getReviewCount())
+                            .likeCount(book.getLikeCount())
+                            .coverImage(book.getCoverImage())
+                            .isLiked(isLiked) // 좋아요 상태 설정
+                            .build();
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
     }
 
 

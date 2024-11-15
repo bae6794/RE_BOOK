@@ -11,6 +11,7 @@ import com.re_book.common.auth.TokenUserInfo;
 import com.re_book.common.dto.CommonErrorDto;
 import com.re_book.common.dto.CommonResDto;
 import com.re_book.user.dto.LoginUserResponseDTO;
+import com.re_book.user.dto.UserResDto;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,19 +70,35 @@ public class BoardController {
     }
 
     @GetMapping("/detail/{id}")
-    public String detailPage(@PathVariable String id,
-                             Model model,
-                             HttpServletRequest request,
-                             @PageableDefault(page = 0, size = 10) Pageable page) {
+    public ResponseEntity<?> detailPage(@PathVariable String id,
+                                        @PageableDefault(page = 0, size = 10) Pageable page,
+                                        @RequestHeader("Authorization") String authorization) {
         log.info("Fetching detail for book id: {}", id);
+        boolean tokenFlag = false;
 
-        HttpSession session = request.getSession();
-        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
-        String userId = user != null ? user.getUuid() : null;
+        Map<String, Object> response = new HashMap<>();
+
+        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
+
+        TokenUserInfo userInfo = null;
+        try {
+            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token); // 토큰 유효성 검사 및 사용자 정보 추출
+        } catch (ExpiredJwtException e) {
+            CommonErrorDto dto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
+            return new ResponseEntity<>(dto, HttpStatus.UNAUTHORIZED);
+        } catch (UnsupportedJwtException e) {
+            CommonErrorDto dto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "지원되지 않는 토큰 형식입니다.");
+            return new ResponseEntity<>(dto, HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            CommonErrorDto dto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않거나 만료되었습니다.");
+            return new ResponseEntity<>(dto, HttpStatus.UNAUTHORIZED);
+        }
 
         // 책 정보와 함께 좋아요 상태 및 좋아요 수 가져오기
-        DetailPageResponseDTO bookDetail = detailService.getBookDetail(id, userId);
+        DetailPageResponseDTO bookDetail = detailService.getBookDetail(id, userInfo.getId());
+
         boolean isLiked = bookDetail.isLiked(); // 사용자의 좋아요 상태
+
         int likeCount = bookDetail.getLikeCount(); // 좋아요 수
         Page<ReviewResponseDTO> reviewPage = reviewService.getReviewList(id, page);
 
@@ -89,15 +106,18 @@ public class BoardController {
         log.info("Book detail: {}", bookDetail);
 
         // 모델에 필요한 정보 추가
-        model.addAttribute("book", bookDetail);
-        model.addAttribute("isLiked", isLiked); // 좋아요 상태 추가
-        model.addAttribute("likeCount", likeCount); // 좋아요 수 추가
-        model.addAttribute("reviewList", reviewPage.getContent());
-        model.addAttribute("page", reviewPage);
-        model.addAttribute("user", user);  // 추가된 부분
+        response.put("book", bookDetail);
+        response.put("isLiked", isLiked); // 좋아요 상태 추가
+        response.put("likeCount", likeCount); // 좋아요 수 추가
+        response.put("reviewList", reviewPage.getContent());
+        response.put("page", reviewPage);
+        response.put("user", userInfo.getId());  // 추가된 부분
 
-        return "detail"; // JSP 페이지로 이동
+        CommonResDto resDto
+                = new CommonResDto(HttpStatus.OK, "디테일페이지 조회 완료", response);
+        return new ResponseEntity<>(resDto, HttpStatus.OK); // 성공 시 OK 상태 코드와 함께 반환
     }
+
 
     @PostMapping("/detail/{bookId}/toggle-like")
     @ResponseBody

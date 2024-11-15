@@ -1,6 +1,8 @@
 package com.re_book.profile.controller;
 
 
+import com.re_book.common.auth.JwtTokenProvider;
+import com.re_book.common.dto.CommonResDto;
 import com.re_book.profile.dto.LikedBooksResponseDTO;
 import com.re_book.profile.dto.MyReviewResponseDTO;
 import com.re_book.profile.dto.ProfileMemberResponseDTO;
@@ -12,12 +14,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 
@@ -28,20 +35,36 @@ import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     @GetMapping("/info")
-    public String info(HttpServletRequest request,
-        Model model) {
-        HttpSession session = request.getSession();
-        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
+    public ResponseEntity<?> info(HttpServletRequest request) {
+//        HttpSession session = request.getSession();
+//        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
+
+        Map<String, Object> response = new HashMap<>();
 
         if (user != null) {
             ProfileMemberResponseDTO member = profileService.getMyProfile(user.getEmail());
-            model.addAttribute("member", member);
+            response.put("member", member);
         }
-        return "member-info";
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "회원 정보 조회 완료", response);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
+
+//    @GetMapping("/info")
+//    public String info(HttpServletRequest request,
+//        Model model) {
+//        HttpSession session = request.getSession();
+//        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
+//
+//        if (user != null) {
+//            ProfileMemberResponseDTO member = profileService.getMyProfile(user.getEmail());
+//            model.addAttribute("member", member);
+//        }
+//        return "member-info";
+//    }
 
     @GetMapping("/liked-books")
     public String likedBooks(HttpServletRequest request,

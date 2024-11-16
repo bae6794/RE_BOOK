@@ -70,36 +70,45 @@ public class BoardController {
     }
 
     @GetMapping("/detail/{id}")
-    public ResponseEntity<?> detailPage(@PathVariable String id,
-                                        @PageableDefault(page = 0, size = 10) Pageable page,
-                                        @RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<?> detailPage(
+        @PathVariable String id,
+        @PageableDefault(page = 0, size = 10) Pageable page,
+        @RequestHeader(value = "Authorization", required = false) String authorization) {
+
         log.info("Fetching detail for book id: {}", id);
-        boolean tokenFlag = false;
 
         Map<String, Object> response = new HashMap<>();
 
-        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
+        // 비로그인 상태를 처리하기 위해 초기값 설정
+        String memberId = null;
 
-        TokenUserInfo userInfo = null;
-        try {
-            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token); // 토큰 유효성 검사 및 사용자 정보 추출
-        } catch (ExpiredJwtException e) {
-            CommonErrorDto dto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
-            return new ResponseEntity<>(dto, HttpStatus.UNAUTHORIZED);
-        } catch (UnsupportedJwtException e) {
-            CommonErrorDto dto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "지원되지 않는 토큰 형식입니다.");
-            return new ResponseEntity<>(dto, HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            CommonErrorDto dto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않거나 만료되었습니다.");
-            return new ResponseEntity<>(dto, HttpStatus.UNAUTHORIZED);
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            String token = authorization.substring(7); // 'Bearer '를 제거하여 토큰만 추출
+            try {
+                TokenUserInfo userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token); // 토큰 유효성 검사 및 사용자 정보 추출
+                memberId = userInfo.getId(); // 토큰이 유효하면 사용자 ID를 추출
+            } catch (ExpiredJwtException e) {
+                log.warn("Token expired: {}", e.getMessage());
+                return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+                    HttpStatus.UNAUTHORIZED);
+            } catch (UnsupportedJwtException e) {
+                log.warn("Unsupported token: {}", e.getMessage());
+                return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "지원되지 않는 토큰 형식입니다."),
+                    HttpStatus.UNAUTHORIZED);
+            } catch (Exception e) {
+                log.warn("Invalid token: {}", e.getMessage());
+                // 비로그인 사용자는 memberId를 null로 유지
+            }
         }
 
         // 책 정보와 함께 좋아요 상태 및 좋아요 수 가져오기
-        DetailPageResponseDTO bookDetail = detailService.getBookDetail(id, userInfo.getId());
+        DetailPageResponseDTO bookDetail = detailService.getBookDetail(id, memberId);
 
-        boolean isLiked = bookDetail.isLiked(); // 사용자의 좋아요 상태
+        // 좋아요 상태 및 좋아요 수
+        boolean isLiked = bookDetail.isLiked();
+        int likeCount = bookDetail.getLikeCount();
 
-        int likeCount = bookDetail.getLikeCount(); // 좋아요 수
+        // 리뷰 목록 가져오기
         Page<ReviewResponseDTO> reviewPage = reviewService.getReviewList(id, page);
 
         // 책 정보가 제대로 전달되는지 로그로 확인
@@ -107,16 +116,16 @@ public class BoardController {
 
         // 모델에 필요한 정보 추가
         response.put("book", bookDetail);
-        response.put("isLiked", isLiked); // 좋아요 상태 추가
-        response.put("likeCount", likeCount); // 좋아요 수 추가
+        response.put("isLiked", isLiked);
+        response.put("likeCount", likeCount);
         response.put("reviewList", reviewPage.getContent());
         response.put("page", reviewPage);
-        response.put("user", userInfo.getId());  // 추가된 부분
+        response.put("user", memberId); // 로그인 사용자 정보 (비로그인 시 null)
 
-        CommonResDto resDto
-                = new CommonResDto(HttpStatus.OK, "디테일페이지 조회 완료", response);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "디테일페이지 조회 완료", response);
         return new ResponseEntity<>(resDto, HttpStatus.OK); // 성공 시 OK 상태 코드와 함께 반환
     }
+
 
 
     @PostMapping("/detail/{bookId}/toggle-like")

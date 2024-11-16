@@ -4,6 +4,7 @@ package com.re_book.board.service;
 import com.re_book.board.dto.response.HomeRecommendedResponseDTO;
 import com.re_book.entity.Book;
 import com.re_book.repository.BookRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class HomeService {
     private final BookRepository bookRepository;
 

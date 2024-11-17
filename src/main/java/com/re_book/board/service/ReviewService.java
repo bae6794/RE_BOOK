@@ -32,11 +32,11 @@ public class ReviewService {
                 .map(ReviewResponseDTO::new);
     }
 
-    public Review register(String bookId, ReviewPostRequestDTO dto) {
+    public Review register(String bookId, ReviewPostRequestDTO dto, String userInfo) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("책을 찾을 수 없습니다."));
 
-        Member member = memberRepository.findById(dto.getMemberUuid())
+        Member member = memberRepository.findById(userInfo)
                 .orElseThrow(() -> new EntityNotFoundException("회원 정보를 찾을 수 없습니다."));
 
         Review review = Review.builder()

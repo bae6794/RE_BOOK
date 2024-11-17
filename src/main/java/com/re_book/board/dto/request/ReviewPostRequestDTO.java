@@ -2,23 +2,22 @@ package com.re_book.board.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class ReviewPostRequestDTO {
 
     private String memberUuid;
     private String nickName;
 
-    @NotBlank
-    @Size(min = 1, max = 300)
-    private final String content;
-    private int rating;
+    @NotBlank(message = "리뷰 내용은 공백일 수 업습니다.")
+    @Size(min = 1, max = 300, message = "리뷰 내용은 1자 이상, 300자 이하여야 합니다.")
+    private String content;
+
+    private Integer rating;
 
 }

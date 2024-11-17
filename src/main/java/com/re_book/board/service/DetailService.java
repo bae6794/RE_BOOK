@@ -22,7 +22,7 @@ public class DetailService {
     public DetailPageResponseDTO getBookDetail(String id, String userId) {
         return bookRepository.findById(id)
             .map(book -> {
-                boolean isLiked = bookLikeRepository.existsByBookIdAndMemberId(id, userId);
+                boolean isLiked = userId != null && bookLikeRepository.existsByBookIdAndMemberId(id, userId);
                 return DetailPageResponseDTO.builder()
                     .id(book.getId())
                     .name(book.getName())
@@ -38,8 +38,6 @@ public class DetailService {
             })
             .orElseThrow(() -> new IllegalArgumentException("Book not found"));
     }
-
-
 
 
     //

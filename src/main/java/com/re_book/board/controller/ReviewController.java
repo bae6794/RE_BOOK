@@ -200,8 +200,6 @@ public class ReviewController {
 
     }
 
-}
-
 /*
 // 리뷰 수정
 @PutMapping("/{reviewId}")
@@ -243,7 +241,68 @@ public ResponseEntity<Map<String, Object>> updateReview(
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
+*/
 
+    //리뷰 삭제
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<?> deleteReview(
+            @PathVariable String reviewId,
+            @RequestHeader("Authorization") String authorization) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Authorization 헤더가 없거나, 'Bearer ' 접두어가 없는 경우 처리
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.BAD_REQUEST, "Authorization 헤더가 없거나 잘못된 형식입니다.");
+            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+        }
+
+        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
+
+        TokenUserInfo userInfo = null;
+        try {
+            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token);// 토큰 유효성 검사 및 사용자 정보 추출
+        } catch (ExpiredJwtException e) {
+            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
+            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
+        } catch (UnsupportedJwtException e) {
+            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "지원되지 않는 토큰 형식입니다.");
+            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않거나 만료되었습니다.");
+            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            String memberUuid = userInfo.getId();
+            reviewService.deleteReview(reviewId, memberUuid);
+            response.put("success", true);
+            response.put("message", "리뷰가 성공적으로 삭제되었습니다.");
+
+            CommonResDto resDto
+                    = new CommonResDto(HttpStatus.OK, "리뷰 삭제 완료", response);
+            return new ResponseEntity<>(resDto, HttpStatus.OK);
+        } catch (SecurityException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+
+            CommonErrorDto errorDto
+                    = new CommonErrorDto(HttpStatus.FORBIDDEN, e.getMessage());
+            return new ResponseEntity<>(errorDto, HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "리뷰 삭제 중 오류가 발생했습니다.");
+            log.error("Error deleting review", e);
+
+            CommonErrorDto errorDto
+                    = new CommonErrorDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+}
+
+/*
 // 리뷰 삭제
 @DeleteMapping("/{reviewId}")
 public ResponseEntity<Map<String, Object>> deleteReview(

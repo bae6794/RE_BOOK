@@ -40,17 +40,4 @@ public class HomeController {
         return new ResponseEntity<>(resDto, HttpStatus.OK); // 성공 시 OK 상태 코드와 함께 반환
     }
 
-    /*
-    public String Home(Model model) {
-        List<HomeRecommendedResponseDTO> recommendedByRating = homeService.recommendedListByRating();
-        List<HomeRecommendedResponseDTO> recommendedByReviewCount = homeService.recommendedListByReviewCount();
-        List<HomeRecommendedResponseDTO> recommendedByLikeCount = homeService.recommendedListByLikeCount();
-
-        model.addAttribute("recommendedByRating", recommendedByRating);
-        model.addAttribute("recommendedByReviewCount", recommendedByReviewCount);
-        model.addAttribute("recommendedByLikeCount", recommendedByLikeCount);
-
-        return "home";
-    }
-     */
 }

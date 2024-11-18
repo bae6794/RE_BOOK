@@ -53,6 +53,7 @@ public class ProfileController {
         return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
 
+
 //    @GetMapping("/info")
 //    public String info(HttpServletRequest request,
 //        Model model) {
@@ -67,24 +68,43 @@ public class ProfileController {
 //    }
 
     @GetMapping("/liked-books")
-    public String likedBooks(HttpServletRequest request,
-                             Model model,
-                             @PageableDefault(page = 0, size = 5) Pageable page) {
-        HttpSession session = request.getSession();
-        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
+    public ResponseEntity<?> likedBooks(HttpServletRequest request,
+                                        @PageableDefault(page = 0, size = 5) Pageable page) {
+//        HttpSession session = request.getSession();
+//        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
 
-        if (user != null) {
-            Page<LikedBooksResponseDTO> likedBooks = profileService.getLikedBooksForMember(user.getEmail(),page);
-            if (likedBooks != null) {
-                System.out.println("likedBooks = " + likedBooks);
-            }
-            model.addAttribute("likedBooks", likedBooks);
-        } else {
-            return "redirect:/";
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FOUND).header("Location", "/").build();
         }
 
-        return "liked-books";
+        Page<LikedBooksResponseDTO> likedBooks = profileService.getLikedBooksForMember(user.getEmail(), page);
+        Map<String, Object> response = new HashMap<>();
+        response.put("likedBooks", likedBooks);
+
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "좋아요한 책목록 조회 완료", response);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
+
+
+//    @GetMapping("/liked-books")
+//    public String likedBooks(HttpServletRequest request,
+//                             Model model,
+//                             @PageableDefault(page = 0, size = 5) Pageable page) {
+//        HttpSession session = request.getSession();
+//        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
+//
+//        if (user != null) {
+//            Page<LikedBooksResponseDTO> likedBooks = profileService.getLikedBooksForMember(user.getEmail(),page);
+//            if (likedBooks != null) {
+//                System.out.println("likedBooks = " + likedBooks);
+//            }
+//            model.addAttribute("likedBooks", likedBooks);
+//        } else {
+//            return "redirect:/";
+//        }
+//
+//        return "liked-books";
+//    }
 
     @GetMapping("/my-reviews")
     public String myReviews(HttpServletRequest request,
@@ -94,16 +114,35 @@ public class ProfileController {
         LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
         if (user != null) {
             Page<MyReviewResponseDTO> myReviews = profileService.getmyReviewsForMember(
-                user.getEmail(),page);
+                    user.getEmail(), page);
             model.addAttribute("myReviews", myReviews);
         }
 
         return "my-reviews";
     }
 
+    @GetMapping("/liked-books")
+    public ResponseEntity<?> likedBooks(HttpServletRequest request,
+                                        @PageableDefault(page = 0, size = 5) Pageable page) {
+        HttpSession session = request.getSession();
+        LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FOUND).header("Location", "/").build();
+        }
+
+        Page<LikedBooksResponseDTO> likedBooks = profileService.getLikedBooksForMember(user.getEmail(), page);
+        Map<String, Object> response = new HashMap<>();
+        response.put("likedBooks", likedBooks);
+
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "좋아요한 책목록 조회 완료", response);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
+    }
+
+
     @PostMapping("/change-nickname")
     public String changeNickname(HttpServletRequest request,
-        @RequestParam("newNickname") String newNickname, Model model) {
+                                 @RequestParam("newNickname") String newNickname, Model model) {
         HttpSession session = request.getSession();
         LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LOGIN_KEY);
         if (user != null) {

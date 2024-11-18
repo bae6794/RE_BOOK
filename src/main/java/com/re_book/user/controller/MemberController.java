@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.re_book.utils.LoginUtils.LOGIN_KEY;
-
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j

@@ -13,4 +13,6 @@ public class TokenUserInfo {
     private String id;
     private Role role;
 
+    public String getEmail() {
+    }
 }

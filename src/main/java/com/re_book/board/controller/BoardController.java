@@ -68,27 +68,7 @@ public class BoardController {
         return new ResponseEntity<>(resDto, HttpStatus.OK); // 성공 시 OK 상태 코드와 함께 반환
     }
 
-//    @GetMapping("/list")
-//    public String list(Model model,
-//                       @PageableDefault(size = 9) Pageable page,
-//                       @RequestParam(required = false) String sort,
-//                       @RequestParam(required = false) String query) {
-//
-//        // page 설정에 맞춰 북 목록을 Map에 저장하겠다.
-//        Page<BookDetailResponseDTO> bookPage;
-//
-//        if (query != null && !query.trim().isEmpty()) {
-//            bookPage = getSortedBookPageForSearch(sort, page, query);
-//        } else {
-//            bookPage = getSortedBookPage(sort, page);
-//        }
-//
-//        model.addAttribute("bList", bookPage.getContent());
-//        model.addAttribute("maker", bookPage);
-//        model.addAttribute("sort", sort);
-//        model.addAttribute("query", query);
-//        return "list";
-//    }
+
 
     private Page<BookDetailResponseDTO> getSortedBookPage(String sort, Pageable pageable) {
         if (sort == null) {
@@ -193,49 +173,7 @@ public class BoardController {
         return new ResponseEntity<>(resDto, HttpStatus.OK); // 성공 시 OK 상태 코드와 함께 반환
     }
 
-//    @PostMapping("/detail/{bookId}/toggle-like")
-//    @ResponseBody
-//    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable String bookId, @RequestHeader("Authorization") String authorization) {
-//        log.info("/toggle-like: POST, {}", bookId);
-//
-//        Map<String, Object> response = new HashMap<>();
-//
-//        // Authorization 헤더가 없거나, 'Bearer ' 접두어가 없는 경우 처리
-//        if (authorization == null || !authorization.startsWith("Bearer ")) {
-//            response.put("success", false);
-//            response.put("message", "Authorization 헤더가 없거나 잘못된 형식입니다.");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-//        }
-//
-//        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
-//
-//        TokenUserInfo userInfo = null;
-//        try {
-//            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token); // 토큰 유효성 검사 및 사용자 정보 추출
-//        } catch (ExpiredJwtException e) {
-//            response.put("success", false);
-//            response.put("message", "토큰이 만료되었습니다.");
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-//        } catch (UnsupportedJwtException e) {
-//            response.put("success", false);
-//            response.put("message", "지원되지 않는 토큰 형식입니다.");
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-//        } catch (Exception e) {
-//            response.put("success", false);
-//            response.put("message", "토큰이 유효하지 않거나 만료되었습니다.");
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response); // 토큰 검증 실패 시 UNAUTHORIZED 응답
-//        }
-//
-//        // 좋아요 토글 및 카운트 업데이트
-//        boolean isLiked = detailService.toggleLike(bookId, userInfo.getId());
-//
-//        int likeCount = detailService.getBookDetail(bookId, userInfo.getId()).getLikeCount(); // 좋아요 수 업데이트
-//        response.put("success", true);
-//        response.put("isLiked", isLiked);
-//        response.put("likeCount", likeCount); // 좋아요 수를 응답에 포함
-//
-//        return ResponseEntity.ok(response); // 성공 시 OK 상태 코드와 함께 반환
-//    }
+
 
 
 

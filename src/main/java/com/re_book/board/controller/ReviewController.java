@@ -10,14 +10,10 @@ import com.re_book.common.dto.CommonErrorDto;
 import com.re_book.common.auth.JwtTokenProvider;
 import com.re_book.common.dto.CommonResDto;
 import com.re_book.entity.Review;
-import com.re_book.user.dto.LoginUserResponseDTO;
-import com.re_book.utils.LoginUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +45,6 @@ public class ReviewController {
 
         log.info("bookId: {}", bookId);
         log.info("dto: {}", dto);
-
 
         Map<String, Object> response = new HashMap<>();
 
@@ -99,41 +94,6 @@ public class ReviewController {
 
         }
     }
-
-
-    /*
-    private final ReviewService reviewService;
-
-    // 리뷰 작성
-    @PostMapping("/{bookId}")
-    public ResponseEntity<Map<String, Object>> createReview(
-            @PathVariable String bookId,
-            @Valid @RequestBody ReviewPostRequestDTO dto,
-            HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
-
-        if (!LoginUtils.isLogin(session)) {
-            response.put("success", false);
-            response.put("message", "로그인이 필요합니다.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-
-        try {
-            Review savedReview = reviewService.register(bookId, dto);
-            response.put("success", true);
-            response.put("message", "리뷰가 성공적으로 작성되었습니다.");
-            response.put("reviewId", savedReview.getId());
-            response.put("nickname", savedReview.getMember().getName());
-            response.put("content", savedReview.getContent());
-            response.put("rating", savedReview.getRating());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "리뷰 작성 중 오류가 발생했습니다.");
-            log.error("Error creating review", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-     */
 
     // 리뷰 수정
     @PutMapping("/{reviewId}")
@@ -200,49 +160,6 @@ public class ReviewController {
 
     }
 
-/*
-// 리뷰 수정
-@PutMapping("/{reviewId}")
-public ResponseEntity<Map<String, Object>> updateReview(
-        @PathVariable String reviewId,
-        @Valid @RequestBody ReviewUpdateRequestDTO dto,
-        HttpSession session) {
-    Map<String, Object> response = new HashMap<>();
-
-    LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LoginUtils.LOGIN_KEY);
-    if (user == null) {
-        response.put("success", false);
-        response.put("message", "로그인이 필요합니다.");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-    }
-
-    String userId = user.getUuid();
-
-    try {
-        reviewService.updateReview(reviewId, dto.getContent(), userId);
-        Review updatedReview = reviewService.findById(reviewId);
-
-        response.put("success", true);
-        response.put("message", "리뷰가 성공적으로 수정되었습니다.");
-        response.put("reviewId", updatedReview.getId());
-        response.put("nickname", updatedReview.getMember().getName());
-        response.put("content", updatedReview.getContent());
-        response.put("rating", updatedReview.getRating());
-
-        return ResponseEntity.ok(response);
-    } catch (SecurityException e) {
-        response.put("success", false);
-        response.put("message", e.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    } catch (Exception e) {
-        response.put("success", false);
-        response.put("message", "리뷰 수정 중 오류가 발생했습니다.");
-        log.error("Error updating review", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-}
-*/
-
     //리뷰 삭제
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<?> deleteReview(
@@ -300,52 +217,38 @@ public ResponseEntity<Map<String, Object>> updateReview(
 
     }
 
-}
+    @GetMapping("/book/{bookId}")//detail에서 인지 book에서인지 확인할것
+    public ResponseEntity<?> printReviewList(
+            @PathVariable String bookId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Map<String, Object> response = new HashMap<>();
 
-/*
-// 리뷰 삭제
-@DeleteMapping("/{reviewId}")
-public ResponseEntity<Map<String, Object>> deleteReview(
-        @PathVariable String reviewId,
-        HttpSession session) {
-    log.info("Received request to delete review with ID: {}", reviewId);
-    Map<String, Object> response = new HashMap<>();
+        try {
+            // 서비스 호출로 페이징된 리뷰 리스트 가져오기
+            Page<ReviewResponseDTO> reviewPage = reviewService.getReviewList(bookId, pageable);
 
-    LoginUserResponseDTO user = (LoginUserResponseDTO) session.getAttribute(LoginUtils.LOGIN_KEY);
-    if (user == null) {
-        response.put("success", false);
-        response.put("message", "로그인이 필요합니다.");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-    }
+            // 응답 데이터 구성
+            response.put("success", true);
+            response.put("message", "리뷰 목록을 성공적으로 조회했습니다.");
+            response.put("reviews", reviewPage.getContent()); // 리뷰 데이터
+            response.put("currentPage", reviewPage.getNumber()); // 현재 페이지 번호
+            response.put("totalItems", reviewPage.getTotalElements()); // 전체 아이템 수
+            response.put("totalPages", reviewPage.getTotalPages()); // 전체 페이지 수
 
-    String userId = user.getUuid();
+            CommonResDto resDto = new CommonResDto(HttpStatus.OK, "리뷰 목록 조회 완료", response);
+            return new ResponseEntity<>(resDto, HttpStatus.OK);
 
-    try {
-        reviewService.deleteReview(reviewId, userId);
-        response.put("success", true);
-        response.put("message", "리뷰가 성공적으로 삭제되었습니다.");
-        return ResponseEntity.ok(response);
-    } catch (SecurityException e) {
-        response.put("success", false);
-        response.put("message", e.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    } catch (Exception e) {
-        response.put("success", false);
-        response.put("message", "리뷰 삭제 중 오류가 발생했습니다.");
-        log.error("Error deleting review", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        } catch (Exception e) {
+            // 예외 처리
+            response.put("success", false);
+            response.put("message", "리뷰 목록 조회 중 오류가 발생했습니다.");
+            log.error("Error retrieving review list", e);
+
+            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 
-// 리뷰 불러오기
-@GetMapping("/book/{bookId}")
-public ResponseEntity<Page<ReviewResponseDTO>> getReviewsByBook(
-        @PathVariable String bookId,
-        @PageableDefault(size = 10) Pageable pageable) {
-    Page<ReviewResponseDTO> reviewPage = reviewService.getReviewList(bookId, pageable);
-    return ResponseEntity.ok(reviewPage);
-}
-}
-*/
 
 

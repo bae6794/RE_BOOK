@@ -28,8 +28,16 @@ public class ReviewService {
     private final BookRepository bookRepository;
 
     public Page<ReviewResponseDTO> getReviewList(String bookId, Pageable pageable) {
-        return reviewRepository.findByBookIdOrderByCreatedDateDesc(bookId, pageable)
-                .map(ReviewResponseDTO::new);
+        Page<Review> reviews = reviewRepository.findByBookIdOrderByCreatedDateDesc(bookId, pageable);
+
+        // Review를 ReviewResponseDTO로 변환
+        return reviews.map(review -> ReviewResponseDTO.builder()
+                .id(review.getId())
+                .content(review.getContent())
+                .rating(review.getRating())
+                .memberName(review.getMember().getName())
+//                .createdDate(review.getCreatedDate())
+                .build());
     }
 
     public Review register(String bookId, ReviewPostRequestDTO dto, String userInfo) {

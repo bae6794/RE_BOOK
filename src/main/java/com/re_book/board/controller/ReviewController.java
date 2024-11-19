@@ -20,13 +20,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/reviews")
+@RequestMapping("board/detail")
 @RequiredArgsConstructor
 @Slf4j
 public class ReviewController {
@@ -36,39 +37,25 @@ public class ReviewController {
 
 
     // 리뷰 작성
-    @PostMapping("/{bookId}")
+    @PostMapping("/{bookId}/create")
     public ResponseEntity<?> createReview(
             @PathVariable String bookId,
             @RequestBody @Valid ReviewPostRequestDTO dto,
-            @RequestHeader("Authorization") String authorization) {
-
+            @AuthenticationPrincipal TokenUserInfo userInfo) {
 
         log.info("bookId: {}", bookId);
         log.info("dto: {}", dto);
 
+        if (userInfo == null) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "로그인이 필요합니다."); // 로그인되지 않았다는 메시지
+
+            CommonResDto errorResDto = new CommonResDto(HttpStatus.UNAUTHORIZED, "로그인 필요", errorResponse);
+            return new ResponseEntity<>(errorResDto, HttpStatus.UNAUTHORIZED); // 401 Unauthorized 응답
+        }
+
         Map<String, Object> response = new HashMap<>();
-
-        // Authorization 헤더가 없거나, 'Bearer ' 접두어가 없는 경우 처리
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.BAD_REQUEST, "Authorization 헤더가 없거나 잘못된 형식입니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
-        }
-
-        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
-
-        TokenUserInfo userInfo = null;
-        try {
-            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token);// 토큰 유효성 검사 및 사용자 정보 추출
-        } catch (ExpiredJwtException e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        } catch (UnsupportedJwtException e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "지원되지 않는 토큰 형식입니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않거나 만료되었습니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        }
 
         try {
             String memberUuid = userInfo.getId();
@@ -100,31 +87,18 @@ public class ReviewController {
     public ResponseEntity<?> updateReview(
             @PathVariable String reviewId,
             @Valid @RequestBody ReviewUpdateRequestDTO dto,
-            @RequestHeader("Authorization") String authorization) {
+            @AuthenticationPrincipal TokenUserInfo userInfo) {
+
+        if (userInfo == null) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "로그인이 필요합니다."); // 로그인되지 않았다는 메시지
+
+            CommonResDto errorResDto = new CommonResDto(HttpStatus.UNAUTHORIZED, "로그인 필요", errorResponse);
+            return new ResponseEntity<>(errorResDto, HttpStatus.UNAUTHORIZED); // 401 Unauthorized 응답
+        }
 
         Map<String, Object> response = new HashMap<>();
-
-        // Authorization 헤더가 없거나, 'Bearer ' 접두어가 없는 경우 처리
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.BAD_REQUEST, "Authorization 헤더가 없거나 잘못된 형식입니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
-        }
-
-        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
-
-        TokenUserInfo userInfo = null;
-        try {
-            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token);// 토큰 유효성 검사 및 사용자 정보 추출
-        } catch (ExpiredJwtException e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        } catch (UnsupportedJwtException e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "지원되지 않는 토큰 형식입니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않거나 만료되었습니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        }
 
         try {
             String memberUuid = userInfo.getId();
@@ -164,30 +138,19 @@ public class ReviewController {
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<?> deleteReview(
             @PathVariable String reviewId,
-            @RequestHeader("Authorization") String authorization) {
+            @AuthenticationPrincipal TokenUserInfo userInfo) {
+
+        if (userInfo == null) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "로그인이 필요합니다."); // 로그인되지 않았다는 메시지
+
+            CommonResDto errorResDto = new CommonResDto(HttpStatus.UNAUTHORIZED, "로그인 필요", errorResponse);
+            return new ResponseEntity<>(errorResDto, HttpStatus.UNAUTHORIZED); // 401 Unauthorized 응답
+        }
         Map<String, Object> response = new HashMap<>();
 
-        // Authorization 헤더가 없거나, 'Bearer ' 접두어가 없는 경우 처리
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.BAD_REQUEST, "Authorization 헤더가 없거나 잘못된 형식입니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
-        }
 
-        String token = authorization.substring(7);  // 'Bearer '를 제거하여 토큰만 추출
-
-        TokenUserInfo userInfo = null;
-        try {
-            userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token);// 토큰 유효성 검사 및 사용자 정보 추출
-        } catch (ExpiredJwtException e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        } catch (UnsupportedJwtException e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "지원되지 않는 토큰 형식입니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            CommonErrorDto errorDto = new CommonErrorDto(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않거나 만료되었습니다.");
-            return new ResponseEntity<>(errorDto, HttpStatus.UNAUTHORIZED);
-        }
 
         try {
             String memberUuid = userInfo.getId();
@@ -216,7 +179,7 @@ public class ReviewController {
         }
 
     }
-
+/*
     @GetMapping("/book/{bookId}")//detail에서 인지 book에서인지 확인할것
     public ResponseEntity<?> printReviewList(
             @PathVariable String bookId,
@@ -248,6 +211,8 @@ public class ReviewController {
             return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+ */
 }
 
 

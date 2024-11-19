@@ -2,6 +2,7 @@ package com.re_book.user.controller;
 
 
 import com.re_book.common.auth.JwtTokenProvider;
+import com.re_book.common.dto.CommonErrorDto;
 import com.re_book.common.dto.CommonResDto;
 import com.re_book.entity.Member;
 import com.re_book.user.dto.LoginRequestDTO;
@@ -74,7 +75,7 @@ public class MemberController {
     }
 
     @PostMapping("/sign-up")
-    public String signUp(@RequestBody MemberRequestDTO dto) {
+    public ResponseEntity<?> signUp(@RequestBody MemberRequestDTO dto) {
        Member findMember = memberService.findByEmail(dto.getEmail());
         Map<String, Object> logInfo = new HashMap<>();
 
@@ -82,10 +83,9 @@ public class MemberController {
             memberService.save(dto);
             CommonResDto resDto = new CommonResDto(HttpStatus.OK, "회원가입 성공", logInfo);
             return new ResponseEntity<>(resDto, HttpStatus.OK);
-            return "redirect:/sign-in";
-
         } else {
-            return "sign-up";
+            CommonErrorDto errDto = new CommonErrorDto(HttpStatus.BAD_REQUEST, "회원가입 실패");
+            return new ResponseEntity<>(errDto, HttpStatus.BAD_REQUEST);
         }
     }
 

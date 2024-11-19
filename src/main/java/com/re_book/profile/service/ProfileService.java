@@ -58,7 +58,7 @@ public class ProfileService {
 
 
 
-    public Page<MyReviewResponseDTO> getmyReviewsForMember(String email, Pageable page) {
+    public Page<MyReviewResponseDTO> getMyReviewsForMember(String email, Pageable page) {
         Member member = memberService.findByEmail(email);
         log.info("member: {}", member);
 

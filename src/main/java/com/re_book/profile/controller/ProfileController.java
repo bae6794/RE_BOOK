@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,15 +36,15 @@ public class ProfileController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/info")
-    public ResponseEntity<?> info(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<?> info(@RequestHeader("Authorization") String authorization,
+                                  @AuthenticationPrincipal TokenUserInfo userInfo) {
         Map<String, Object> response = new HashMap<>();
 
-        TokenUserInfo userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(authorization.substring(7));
         if (userInfo != null) {
             ProfileMemberResponseDTO member = profileService.getMyProfile(userInfo.getEmail());
             response.put("member", member);
         } else {
-            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "Invalid token or user not found"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "로그인하세요."), HttpStatus.UNAUTHORIZED);
         }
         CommonResDto resDto = new CommonResDto(HttpStatus.OK, "회원 정보 조회 완료", response);
         return new ResponseEntity<>(resDto, HttpStatus.OK);
@@ -50,8 +52,8 @@ public class ProfileController {
 
     @GetMapping("/liked-books")
     public ResponseEntity<?> likedBooks(@RequestHeader("Authorization") String authorization,
-                                        @PageableDefault(page = 0, size = 5) Pageable page) {
-        TokenUserInfo userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(authorization.substring(7));
+                                        @PageableDefault(page = 0, size = 5) Pageable page,
+                                        @AuthenticationPrincipal TokenUserInfo userInfo) {
         if (userInfo == null) {
             return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "Invalid token or user not found"), HttpStatus.UNAUTHORIZED);
         }
@@ -65,31 +67,43 @@ public class ProfileController {
     }
 
     @GetMapping("/my-reviews")
-    public String myReviews(@RequestHeader("Authorization") String authorization, Model model,
-                            @PageableDefault(page = 0, size = 5) Pageable page) {
-        TokenUserInfo userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(authorization.substring(7));
+    public ResponseEntity<?> myReviews(@RequestHeader("Authorization") String authorization,
+                                       @PageableDefault(page = 0, size = 5) Pageable page,
+                                       @AuthenticationPrincipal TokenUserInfo userInfo) {
+
         if (userInfo == null) {
-            model.addAttribute("message", "Invalid token or user not found");
-            return "redirect:/";
+            return new ResponseEntity<>(
+                    new CommonErrorDto(HttpStatus.UNAUTHORIZED, "Invalid token or user not found"),
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
         Page<MyReviewResponseDTO> myReviews = profileService.getMyReviewsForMember(userInfo.getEmail(), page);
-        model.addAttribute("myReviews", myReviews);
-        return "my-reviews";
+        Map<String, Object> response = new HashMap<>();
+        response.put("myReviews", myReviews.getContent());
+        response.put("pagination", myReviews);
+
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "내 리뷰 목록 조회 완료", response);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
 
     @PostMapping("/change-nickname")
-    public String changeNickname(@RequestHeader("Authorization") String authorization,
-                                 @RequestParam("newNickname") String newNickname, Model model) {
-        TokenUserInfo userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(authorization.substring(7));
+    public ResponseEntity<?> changeNickname(@RequestHeader("Authorization") String authorization,
+                                            @RequestParam("newNickname") String newNickname,
+                                            @AuthenticationPrincipal TokenUserInfo userInfo) {
+
         if (userInfo == null) {
-            model.addAttribute("message", "Invalid token or user not found");
-            return "redirect:/";
+            return new ResponseEntity<>(
+                    new CommonErrorDto(HttpStatus.UNAUTHORIZED, "Invalid token or user not found"),
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
         profileService.changeNickname(userInfo.getEmail(), newNickname);
-        model.addAttribute("message", "닉네임을 변경했습니다");
-        return "redirect:/profile/info";
+
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "닉네임 변경 성공", null);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
+
 }
 

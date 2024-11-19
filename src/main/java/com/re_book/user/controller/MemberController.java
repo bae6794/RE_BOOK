@@ -74,14 +74,14 @@ public class MemberController {
     }
 
     @PostMapping("/sign-up")
-    public String signUp(@RequestParam String email,
-                         @RequestParam String nickname,
-                         @RequestParam String password
-                         ) {
-       Member findMember = memberService.findByEmail(email);
+    public String signUp(@RequestBody MemberRequestDTO dto) {
+       Member findMember = memberService.findByEmail(dto.getEmail());
+        Map<String, Object> logInfo = new HashMap<>();
 
         if (findMember == null) {
-            memberService.save(new MemberRequestDTO(email, nickname, password));
+            memberService.save(dto);
+            CommonResDto resDto = new CommonResDto(HttpStatus.OK, "회원가입 성공", logInfo);
+            return new ResponseEntity<>(resDto, HttpStatus.OK);
             return "redirect:/sign-in";
 
         } else {

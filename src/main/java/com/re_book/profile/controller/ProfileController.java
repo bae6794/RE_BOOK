@@ -9,27 +9,22 @@ import com.re_book.profile.dto.MyReviewResponseDTO;
 import com.re_book.profile.dto.ProfileMemberResponseDTO;
 import com.re_book.profile.service.ProfileService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/profile")
+@Slf4j
 public class ProfileController {
 
     private final ProfileService profileService;
@@ -38,10 +33,13 @@ public class ProfileController {
     @GetMapping("/info")
     public ResponseEntity<?> info(@RequestHeader("Authorization") String authorization,
                                   @AuthenticationPrincipal TokenUserInfo userInfo) {
+        log.info("/profile/info: GET, authorization: {}", authorization);
+        log.info("tokenUserInfo: {}", userInfo);
         Map<String, Object> response = new HashMap<>();
 
         if (userInfo != null) {
-            ProfileMemberResponseDTO member = profileService.getMyProfile(userInfo.getEmail());
+            log.info("회원 조회!");
+            ProfileMemberResponseDTO member = profileService.getMyProfile(userInfo.getId());
             response.put("member", member);
         } else {
             return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "로그인하세요."), HttpStatus.UNAUTHORIZED);
@@ -58,7 +56,7 @@ public class ProfileController {
             return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "Invalid token or user not found"), HttpStatus.UNAUTHORIZED);
         }
 
-        Page<LikedBooksResponseDTO> likedBooks = profileService.getLikedBooksForMember(userInfo.getEmail(), page);
+        Page<LikedBooksResponseDTO> likedBooks = profileService.getLikedBooksForMember(userInfo.getId(), page);
         Map<String, Object> response = new HashMap<>();
         response.put("likedBooks", likedBooks);
 
@@ -78,7 +76,7 @@ public class ProfileController {
             );
         }
 
-        Page<MyReviewResponseDTO> myReviews = profileService.getMyReviewsForMember(userInfo.getEmail(), page);
+        Page<MyReviewResponseDTO> myReviews = profileService.getMyReviewsForMember(userInfo.getId(), page);
         Map<String, Object> response = new HashMap<>();
         response.put("myReviews", myReviews.getContent());
         response.put("pagination", myReviews);
@@ -99,7 +97,7 @@ public class ProfileController {
             );
         }
 
-        profileService.changeNickname(userInfo.getEmail(), newNickname);
+        profileService.changeNickname(userInfo.getId(), newNickname);
 
         CommonResDto resDto = new CommonResDto(HttpStatus.OK, "닉네임 변경 성공", null);
         return new ResponseEntity<>(resDto, HttpStatus.OK);

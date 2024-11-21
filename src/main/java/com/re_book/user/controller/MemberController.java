@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -76,10 +77,11 @@ public class MemberController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody MemberRequestDTO dto) {
-       Member findMember = memberService.findByEmail(dto.getEmail());
+        Optional<Member> findMember = memberService.existInEmail(dto.getEmail());
         Map<String, Object> logInfo = new HashMap<>();
 
-        if (findMember == null) {
+        System.out.println(findMember);
+        if (findMember.isEmpty()) {
             memberService.save(dto);
             CommonResDto resDto = new CommonResDto(HttpStatus.OK, "회원가입 성공", logInfo);
             return new ResponseEntity<>(resDto, HttpStatus.OK);

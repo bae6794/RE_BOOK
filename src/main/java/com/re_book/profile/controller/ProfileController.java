@@ -96,10 +96,10 @@ public class ProfileController {
                     HttpStatus.UNAUTHORIZED
             );
         }
-
+        Map<String, Object> response = new HashMap<>();
         profileService.changeNickname(userInfo.getId(), newNickname);
 
-        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "닉네임 변경 성공", null);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "닉네임 변경 성공", response);
         return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
 

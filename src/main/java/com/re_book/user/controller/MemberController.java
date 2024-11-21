@@ -2,6 +2,7 @@ package com.re_book.user.controller;
 
 
 import com.re_book.common.auth.JwtTokenProvider;
+import com.re_book.common.dto.CommonErrorDto;
 import com.re_book.common.dto.CommonResDto;
 import com.re_book.entity.Member;
 import com.re_book.user.dto.LoginRequestDTO;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -74,18 +76,18 @@ public class MemberController {
     }
 
     @PostMapping("/sign-up")
-    public String signUp(@RequestParam String email,
-                         @RequestParam String nickname,
-                         @RequestParam String password
-                         ) {
-       Member findMember = memberService.findByEmail(email);
+    public ResponseEntity<?> signUp(@RequestBody MemberRequestDTO dto) {
+        Optional<Member> findMember = memberService.existInEmail(dto.getEmail());
+        Map<String, Object> logInfo = new HashMap<>();
 
-        if (findMember == null) {
-            memberService.save(new MemberRequestDTO(email, nickname, password));
-            return "redirect:/sign-in";
-
+        System.out.println(findMember);
+        if (findMember.isEmpty()) {
+            memberService.save(dto);
+            CommonResDto resDto = new CommonResDto(HttpStatus.OK, "회원가입 성공", logInfo);
+            return new ResponseEntity<>(resDto, HttpStatus.OK);
         } else {
-            return "sign-up";
+            CommonErrorDto errDto = new CommonErrorDto(HttpStatus.BAD_REQUEST, "회원가입 실패");
+            return new ResponseEntity<>(errDto, HttpStatus.BAD_REQUEST);
         }
     }
 

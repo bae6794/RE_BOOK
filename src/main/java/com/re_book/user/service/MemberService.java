@@ -4,12 +4,10 @@ package com.re_book.user.service;
 import com.re_book.entity.Member;
 import com.re_book.repository.MemberRepository;
 import com.re_book.user.dto.LoginRequestDTO;
-import com.re_book.user.dto.LoginUserResponseDTO;
 import com.re_book.user.dto.MemberRequestDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Random;
-
-import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 
 
 @Service
@@ -130,14 +126,15 @@ public class MemberService {
         mailSender.send(message);
     }
 
-
-
     public Member findByEmail(String email) {
-        return memberRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("User not found")
+        return memberRepository.findByEmail(email).orElseThrow(() ->
+                new EntityNotFoundException("User not found")
         );
     }
 
+    public Optional<Member> existInEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
 
     public void update(Member member) {
         memberRepository.save(member);

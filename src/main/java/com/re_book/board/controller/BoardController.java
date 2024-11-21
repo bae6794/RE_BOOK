@@ -8,14 +8,8 @@ import com.re_book.board.service.DetailService;
 import com.re_book.board.service.ReviewService;
 import com.re_book.common.auth.JwtTokenProvider;
 import com.re_book.common.auth.TokenUserInfo;
-import com.re_book.common.dto.CommonErrorDto;
 import com.re_book.common.dto.CommonResDto;
-import com.re_book.user.dto.LoginUserResponseDTO;
-import com.re_book.user.dto.UserResDto;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,14 +18,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.re_book.utils.LoginUtils.LOGIN_KEY;
 
 
 @RestController

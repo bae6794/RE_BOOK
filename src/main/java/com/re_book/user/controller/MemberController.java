@@ -93,10 +93,16 @@ public class MemberController {
 
     // 이메일 인증 코드 전송 처리
     @PostMapping("/send-auth-code")
-    public ResponseEntity<Void> sendAuthCode(@RequestParam String email, HttpSession session) throws MessagingException {
-        String authCode = memberService.sendAuthCode(email); // 인증 코드 발송
-        session.setAttribute("sentAuthCode", authCode); // 세션에 인증 코드 저장
-        return ResponseEntity.ok().build(); // 성공 응답 반환
+    public ResponseEntity<?> sendAuthCode(@RequestParam String email, HttpSession session) throws MessagingException {
+        email = email.trim();
+        boolean validEmail =email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+        if (validEmail) {
+            String authCode = memberService.sendAuthCode(email); // 인증 코드 발송
+            session.setAttribute("sentAuthCode", authCode); // 세션에 인증 코드 저장
+            return ResponseEntity.ok().body("인증번호 전송 성공."); // 성공 응답 반환
+        }
+        return ResponseEntity.badRequest().body("인증번호 전송 실패"); // 성공 응답 반환
+
     }
 
     // 인증 코드 확인 처리

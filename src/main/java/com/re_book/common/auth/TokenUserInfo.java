@@ -12,5 +12,6 @@ public class TokenUserInfo {
 
     private String id;
     private Role role;
+    private String name;
 
 }

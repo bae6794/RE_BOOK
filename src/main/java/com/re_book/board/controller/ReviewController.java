@@ -56,7 +56,7 @@ public class ReviewController {
             response.put("success", true);
             response.put("message", "리뷰가 성공적으로 작성되었습니다.");
             response.put("reviewId", savedReview.getId());
-            response.put("nickname", savedReview.getMember().getName());
+            response.put("memberName", savedReview.getMember().getName());
             response.put("content", savedReview.getContent());
             response.put("rating", savedReview.getRating());
 

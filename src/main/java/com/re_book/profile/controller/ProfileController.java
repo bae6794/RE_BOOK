@@ -87,7 +87,7 @@ public class ProfileController {
 
     @PostMapping("/change-nickname")
     public ResponseEntity<?> changeNickname(@RequestHeader("Authorization") String authorization,
-                                            @RequestParam("newNickname") String newNickname,
+                                            @RequestBody Map<String, String> requestBody,
                                             @AuthenticationPrincipal TokenUserInfo userInfo) {
 
         if (userInfo == null) {
@@ -96,12 +96,24 @@ public class ProfileController {
                     HttpStatus.UNAUTHORIZED
             );
         }
-        Map<String, Object> response = new HashMap<>();
-        profileService.changeNickname(userInfo.getId(), newNickname);
 
+        String newNickname = requestBody.get("newNickname");
+
+        // 닉네임 변경 서비스 호출 및 예외 처리
+        try {
+            profileService.changeNickname(userInfo.getId(), newNickname);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    new CommonErrorDto(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류 발생"),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+
+        Map<String, Object> response = new HashMap<>();
         CommonResDto resDto = new CommonResDto(HttpStatus.OK, "닉네임 변경 성공", response);
         return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
+
 
 }
 

@@ -35,7 +35,7 @@ public class BoardController {
     private final ReviewService reviewService;
     private final JwtTokenProvider jwtTokenProvider;
 
-
+    // list입니다.
     @GetMapping("/list")
     public ResponseEntity<?> list(@PageableDefault(size = 9) Pageable page,
                        @RequestParam(required = false) String sort,

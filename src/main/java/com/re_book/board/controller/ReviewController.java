@@ -81,6 +81,8 @@ public class ReviewController {
             @PathVariable String reviewId,
             @Valid @RequestBody ReviewUpdateRequestDTO dto,
             @AuthenticationPrincipal TokenUserInfo userInfo) {
+        log.info("reviewId: {}", reviewId);
+
 
         if (userInfo == null) {
             Map<String, Object> errorResponse = new HashMap<>();

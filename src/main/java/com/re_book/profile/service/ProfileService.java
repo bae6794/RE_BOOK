@@ -26,8 +26,8 @@ public class ProfileService {
 
 
     @Transactional
-    public Page<LikedBooksResponseDTO> getLikedBooksForMember(String email, Pageable page) {
-        Member member = memberService.findByEmail(email);
+    public Page<LikedBooksResponseDTO> getLikedBooksForMember(String id, Pageable page) {
+        Member member = memberService.findById(id).orElseThrow();
         if (member != null) {
             List<LikedBooksResponseDTO> likedBooksList = member.getLikedBooks().stream()
                     .map(book -> LikedBooksResponseDTO.builder()
@@ -58,8 +58,8 @@ public class ProfileService {
 
 
 
-    public Page<MyReviewResponseDTO> getmyReviewsForMember(String email, Pageable page) {
-        Member member = memberService.findByEmail(email);
+    public Page<MyReviewResponseDTO> getMyReviewsForMember(String id, Pageable page) {
+        Member member = memberService.findById(id).orElseThrow();
         log.info("member: {}", member);
 
         if (member != null) {
@@ -79,8 +79,8 @@ public class ProfileService {
         return new PageImpl<>(Collections.emptyList(), page, 0);
     }
 
-    public ProfileMemberResponseDTO getMyProfile(String email) {
-        Member member = memberService.findByEmail(email);
+    public ProfileMemberResponseDTO getMyProfile(String id) {
+        Member member = memberService.findById(id).orElseThrow();
         if (member != null) {
             return ProfileMemberResponseDTO.builder()
                     .nickname(member.getName())
@@ -91,8 +91,8 @@ public class ProfileService {
         return null;
     }
 
-    public void changeNickname(String email, String newNickname) {
-        Member member = memberService.findByEmail(email);
+    public void changeNickname(String id, String newNickname) {
+        Member member = memberService.findById(id).orElseThrow();
         if (member != null) {
             member.setName(newNickname);
             memberService.update(member); // 회원 정보를 업데이트하는 메서드 호출

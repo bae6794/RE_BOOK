@@ -13,6 +13,7 @@ import com.re_book.common.dto.CommonResDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class BoardController {
     private final ReviewService reviewService;
     private final JwtTokenProvider jwtTokenProvider;
 
-
+    // list입니다.
     @GetMapping("/list")
     public ResponseEntity<?> list(@PageableDefault(size = 9) Pageable page,
                        @RequestParam(required = false) String sort,
@@ -64,7 +65,9 @@ public class BoardController {
     @GetMapping("/detail/{id}")
     public ResponseEntity<?> detailPage(
             @PathVariable String id,
-            @PageableDefault(page = 0, size = 10) Pageable page,
+//            @PageableDefault(page = 0, size = 10) Pageable page,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestHeader(value = "Authorization", required = false) String authorization,
             @AuthenticationPrincipal TokenUserInfo userInfo) {
 
@@ -81,8 +84,10 @@ public class BoardController {
         boolean isLiked = (memberId != null) && bookDetail.isLiked();
         int likeCount = bookDetail.getLikeCount();
 
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size);
         // 리뷰 목록 가져오기
-        Page<ReviewResponseDTO> reviewPage = reviewService.getReviewList(id, page);
+        Page<ReviewResponseDTO> reviewPage = reviewService.getReviewList(id, pageable);
 
         // 책 정보가 제대로 전달되는지 로그로 확인
         log.info("Book detail: {}", bookDetail);

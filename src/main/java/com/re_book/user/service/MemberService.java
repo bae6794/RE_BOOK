@@ -48,40 +48,6 @@ public class MemberService {
         }
 
 
-//    public LoginResult authenticate(String email,
-//                                    String pw) {
-//
-//        Member member = memberRepository.findByEmail(email);
-//
-//        //회원가입 여부 검사
-//        if (member == null) {
-//            return  NO_ACCESS;
-//        }
-//
-//        // 비밀번호 일치 검사
-//        if (!encoder.matches(pw, member.getPassword())) {
-//            return NO_PW;
-//        }
-//
-//
-//        return SUCCESS;
-//    }
-
-//    public void maintainLoginState(HttpSession session,
-//                                   String email) {
-//
-//        Member foundMember = findByEmail(email);
-//
-//        LoginUserResponseDTO dto = LoginUserResponseDTO.builder()
-//                .uuid(foundMember.getUuid())
-//                .email(foundMember.getEmail())
-//                .nickname(foundMember.getNickname())
-//                .likedBooks(foundMember.getLikedBooks())
-//                .reviews(foundMember.getReviews())
-//                .build();
-//        session.setAttribute(LOGIN_KEY, dto);
-//    }
-
     public String sendAuthCode(String email) throws MessagingException {
         // 난수 생성
         String authCode = generateAuthCode();

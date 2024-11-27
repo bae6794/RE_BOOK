@@ -59,6 +59,7 @@ public class ReviewController {
             response.put("memberName", savedReview.getMember().getName());
             response.put("content", savedReview.getContent());
             response.put("rating", savedReview.getRating());
+            response.put("createDate", savedReview.getCreatedDate());
 
             CommonResDto resDto
                     = new CommonResDto(HttpStatus.OK, "리뷰 작성 완료", response);

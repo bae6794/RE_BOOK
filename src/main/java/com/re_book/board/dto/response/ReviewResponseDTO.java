@@ -3,6 +3,8 @@ package com.re_book.board.dto.response;
 import com.re_book.entity.Review;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @ToString
 @EqualsAndHashCode
@@ -16,6 +18,7 @@ public class ReviewResponseDTO {
     private final String content;
     private final String memberName;
     private String memberUuid;
+    private LocalDateTime createdDate;
 
     private int reviewCount;
 
@@ -29,6 +32,7 @@ public class ReviewResponseDTO {
         this.memberName = review.getMember().getName();
         this.memberUuid = review.getMember().getId();
         this.reviewCount = review.getBook().getReviewCount();
+        this.createdDate = review.getCreatedDate();
     }
 
 

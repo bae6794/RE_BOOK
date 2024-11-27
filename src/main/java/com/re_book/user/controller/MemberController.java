@@ -93,25 +93,21 @@ public class MemberController {
 
     // 이메일 인증 코드 전송 처리
     @PostMapping("/send-auth-code")
-    public ResponseEntity<?> sendAuthCode(@RequestParam String email, HttpSession session) throws MessagingException {
+    public ResponseEntity<?> sendAuthCode(@RequestBody Map<String, String> param) throws MessagingException {
+        String email = param.get("email");
         email = email.trim();
-        boolean validEmail =email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+        boolean validEmail = email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+
         if (validEmail) {
             String authCode = memberService.sendAuthCode(email); // 인증 코드 발송
-            session.setAttribute("sentAuthCode", authCode); // 세션에 인증 코드 저장
-            return ResponseEntity.ok().body("인증번호 전송 성공."); // 성공 응답 반환
+            Map<String, Object> logInfo = new HashMap<>();
+            logInfo.put("authCode", authCode);
+
+            CommonResDto resDto = new CommonResDto(HttpStatus.OK, "인증번호 전송 성공", logInfo);
+
+            return new ResponseEntity<>(resDto, HttpStatus.OK);
         }
         return ResponseEntity.badRequest().body("인증번호 전송 실패"); // 성공 응답 반환
 
-    }
-
-    // 인증 코드 확인 처리
-    @PostMapping("/verify-auth-code")
-    public ResponseEntity<Map<String, Object>> verifyAuthCode(@RequestParam String authCode, HttpSession session) {
-        String sentAuthCode = (String) session.getAttribute("sentAuthCode");
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("isValid", sentAuthCode != null && sentAuthCode.equals(authCode)); // 입력된 코드와 비교
-        return ResponseEntity.ok(response); // 응답 반환
     }
 }

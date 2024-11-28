@@ -36,7 +36,7 @@ public class ReviewService {
                 .content(review.getContent())
                 .rating(review.getRating())
                 .memberName(review.getMember().getName())
-//                .createdDate(review.getCreatedDate())
+                .createdDate(review.getCreatedDate())
                 .build());
     }
 

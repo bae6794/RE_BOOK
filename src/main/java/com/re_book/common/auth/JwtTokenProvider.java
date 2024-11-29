@@ -27,8 +27,8 @@ public class JwtTokenProvider {
     private int expirationRt;
 
     // 토큰 생성 메서드
-    public String createToken(String email, String role, String name) {
-        Claims claims = Jwts.claims().setSubject(email);
+    public String createToken(String id, String role, String name) {
+        Claims claims = Jwts.claims().setSubject(id);
         claims.put("role", role);
         claims.put("name", name); // name 추가
         Date date = new Date();

@@ -35,6 +35,7 @@ public class ReviewService {
                 .id(review.getId())
                 .content(review.getContent())
                 .rating(review.getRating())
+                .memberUuid(review.getMember().getId())
                 .memberName(review.getMember().getName())
                 .createdDate(review.getCreatedDate())
                 .build());
